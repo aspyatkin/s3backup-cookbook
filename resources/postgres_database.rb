@@ -22,6 +22,7 @@ default_action :create
 action :create do
   basedir = "/etc/chef-#{id}"
   instance = ::ChefCookbook::Instance::Helper.new(node)
+  helper = ::ChefCookbook::BetterSSMTP::Helper.new(node)
 
   include_recipe "#{id}::default"
 
@@ -54,7 +55,7 @@ action :create do
 
   cron "backup_#{new_resource.entry_name}" do
     unless schedule.fetch(:mailto, nil).nil? && schedule.fetch(:mailfrom, nil).nil?
-      command %Q(#{script_filepath} 2>&1 | mail -s "Cron backup_#{new_resource.entry_name}" -a "From: #{schedule[:mailfrom]}" #{schedule[:mailto]})
+      command %Q(#{script_filepath} 2>&1 | #{helper.mail_send_command("Cron backup_#{new_resource.entry_name}", schedule[:mailfrom], schedule[:mailto])})
     else
       command "#{script_filepath}"
     end
@@ -78,7 +79,7 @@ action :delete do
 
   cron "backup_#{new_resource.entry_name}" do
     unless new_resource.schedule.fetch(:mailto, nil).nil? && new_resource.schedule.fetch(:mailfrom, nil).nil?
-      command %Q(#{script_filepath} 2>&1 | mail -s "Cron backup_#{new_resource.entry_name}" -a "From: #{new_resource.schedule[:mailfrom]}" #{new_resource.schedule[:mailto]})
+      command %Q(#{script_filepath} 2>&1 | #{helper.mail_send_command("Cron backup_#{new_resource.entry_name}", schedule[:mailfrom], schedule[:mailto])})
     else
       command "#{script_filepath}"
     end
