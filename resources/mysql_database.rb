@@ -78,6 +78,7 @@ action :delete do
   end
 
   schedule = new_resource.schedule
+  helper = ::ChefCookbook::BetterSSMTP::Helper.new(node)
 
   cron "backup_#{new_resource.entry_name}" do
     unless new_resource.schedule.fetch(:mailto, nil).nil? && new_resource.schedule.fetch(:mailfrom, nil).nil?

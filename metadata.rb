@@ -2,7 +2,7 @@ name 's3backup'
 maintainer 'Alexander Pyatkin'
 maintainer_email 'aspyatkin@gmail.com'
 description ''
-version '1.0.1'
+version '1.0.2'
 
 depends 'poise-python', '~> 1.6.0'
 depends 'instance', '~> 2.0.0'
