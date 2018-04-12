@@ -16,6 +16,7 @@ property :aws_s3_bucket_region, String, required: true
 property :aws_s3_bucket_name, String, required: true
 
 property :schedule, Hash, required: true
+property :archive, [TrueClass, FalseClass], default: true
 
 default_action :create
 
@@ -44,7 +45,8 @@ action :create do
       aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
       aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
       aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
-      aws_s3_bucket_name: new_resource.aws_s3_bucket_name
+      aws_s3_bucket_name: new_resource.aws_s3_bucket_name,
+      archive: new_resource.archive
     )
     mode 0700
     sensitive true
