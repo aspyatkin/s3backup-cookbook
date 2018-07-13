@@ -23,7 +23,6 @@ default_action :create
 action :create do
   basedir = "/etc/chef-#{id}"
   instance = ::ChefCookbook::Instance::Helper.new(node)
-  helper = ::ChefCookbook::BetterSSMTP::Helper.new(node)
 
   include_recipe "#{id}::default"
 
@@ -53,19 +52,9 @@ action :create do
     action :create
   end
 
-  schedule = new_resource.schedule
-
-  cron "backup_#{new_resource.entry_name}" do
-    unless schedule.fetch(:mailto, nil).nil? && schedule.fetch(:mailfrom, nil).nil?
-      command %Q(#{script_filepath} 2>&1 | #{helper.mail_send_command("Cron backup_#{new_resource.entry_name}", schedule[:mailfrom], schedule[:mailto])})
-    else
-      command "#{script_filepath}"
-    end
-    minute schedule.fetch(:minute, '0')
-    hour schedule.fetch(:hour, '2')
-    day schedule.fetch(:day, '*')
-    month schedule.fetch(:month, '*')
-    weekday schedule.fetch(:weekday, '*')
+  s3backup_cron_entry "backup_#{new_resource.entry_name}" do
+    command script_filepath
+    schedule new_resource.schedule
     action :create
   end
 end
@@ -77,20 +66,9 @@ action :delete do
     action :delete
   end
 
-  schedule = new_resource.schedule
-  helper = ::ChefCookbook::BetterSSMTP::Helper.new(node)
-
-  cron "backup_#{new_resource.entry_name}" do
-    unless new_resource.schedule.fetch(:mailto, nil).nil? && new_resource.schedule.fetch(:mailfrom, nil).nil?
-      command %Q(#{script_filepath} 2>&1 | #{helper.mail_send_command("Cron backup_#{new_resource.entry_name}", schedule[:mailfrom], schedule[:mailto])})
-    else
-      command "#{script_filepath}"
-    end
-    minute schedule.fetch(:minute, '0')
-    hour schedule.fetch(:hour, '2')
-    day schedule.fetch(:day, '*')
-    month schedule.fetch(:month, '*')
-    weekday schedule.fetch(:weekday, '*')
+  s3backup_cron_entry "backup_#{new_resource.entry_name}" do
+    command script_filepath
+    schedule new_resource.schedule
     action :delete
   end
 end
