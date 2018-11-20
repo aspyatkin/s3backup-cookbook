@@ -1,14 +1,8 @@
-id = 's3backup'
-
-resource_name :s3backup_postgres_database
+resource_name :s3backup_item
 
 property :entry_name, String, name_property: true
 
-property :db_host, String, required: true
-property :db_port, Integer, required: true
-property :db_name, String, required: true
-property :db_username, String, required: true
-property :db_password, String, required: true
+property :backup_command, String, required: true
 
 property :aws_iam_access_key_id, String, required: true
 property :aws_iam_secret_access_key, String, required: true
@@ -16,36 +10,32 @@ property :aws_s3_bucket_region, String, required: true
 property :aws_s3_bucket_name, String, required: true
 
 property :schedule, Hash, required: true
-property :archive, [TrueClass, FalseClass], default: true
 
 default_action :create
 
 action :create do
-  basedir = "/etc/chef-#{id}"
+  basedir = '/etc/chef-s3backup'
   instance = ::ChefCookbook::Instance::Helper.new(node)
 
-  include_recipe "#{id}::default"
+  s3backup_base basedir do
+    action :create
+  end
 
   script_filepath = ::File.join(basedir, "backup_#{new_resource.entry_name}")
 
   template script_filepath do
-    cookbook id
-    source 'backup.postgres.sh.erb'
+    cookbook 's3backup'
+    source 'backup.item.sh.erb'
     owner instance.root
     group node['root_group']
     variables(
       virtualenv_path: ::File.join(basedir, '.venv'),
       entry_name: new_resource.entry_name,
-      pg_host: new_resource.db_host,
-      pg_port: new_resource.db_port,
-      pg_dbname: new_resource.db_name,
-      pg_username: new_resource.db_username,
-      pg_password: new_resource.db_password,
+      backup_command: new_resource.backup_command,
       aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
       aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
       aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
-      aws_s3_bucket_name: new_resource.aws_s3_bucket_name,
-      archive: new_resource.archive
+      aws_s3_bucket_name: new_resource.aws_s3_bucket_name
     )
     mode 0700
     sensitive true
@@ -60,7 +50,7 @@ action :create do
 end
 
 action :delete do
-  script_filepath = ::File.join('/etc', "chef-#{id}", "backup_#{new_resource.entry_name}")
+  script_filepath = ::File.join(basedir, "backup_#{new_resource.entry_name}")
 
   file script_filepath do
     action :delete

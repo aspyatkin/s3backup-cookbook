@@ -13,10 +13,11 @@ action :create do
 
   ruby_block "construct #{new_resource.entry_name} command" do
     block do
-      full_command = "#{node.run_state['cronic_installed'] ? "#{node.run_state['cronic_command']} " : ''}#{new_resource.command}"
+      cronic_installed = !node.run_state['cronic'].nil? && node.run_state['cronic']['installed']
+      full_command = "#{cronic_installed ? "#{node.run_state['cronic']['command']} " : ''}#{new_resource.command}"
 
       unless schedule.fetch(:mailto, nil).nil? && schedule.fetch(:mailfrom, nil).nil?
-        full_command += " 2>&1 | #{helper.mail_send_command('Cron ' + new_resource.entry_name, schedule[:mailfrom], schedule[:mailto], node.run_state['cronic_installed'])}"
+        full_command += " 2>&1 | #{helper.mail_send_command('Cron ' + new_resource.entry_name, schedule[:mailfrom], schedule[:mailto], cronic_installed)}"
       end
     end
     action :run
@@ -40,10 +41,11 @@ action :delete do
 
   ruby_block "construct #{new_resource.entry_name} command" do
     block do
-      full_command = "#{node.run_state['cronic_installed'] ? "#{node.run_state['cronic_command']} " : ''}#{new_resource.command}"
+      cronic_installed = !node.run_state['cronic'].nil? && node.run_state['cronic']['installed']
+      full_command = "#{cronic_installed ? "#{node.run_state['cronic']['command']} " : ''}#{new_resource.command}"
 
       unless schedule.fetch(:mailto, nil).nil? && schedule.fetch(:mailfrom, nil).nil?
-        full_command += " 2>&1 | #{helper.mail_send_command('Cron ' + new_resource.entry_name, schedule[:mailfrom], schedule[:mailto], node.run_state['cronic_installed'])}"
+        full_command += " 2>&1 | #{helper.mail_send_command('Cron ' + new_resource.entry_name, schedule[:mailfrom], schedule[:mailto], cronic_installed)}"
       end
     end
     action :run
