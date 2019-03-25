@@ -1,21 +1,21 @@
 resource_name :s3backup_base
 
-property :basedir, String, name_property: true
+property :base_dir, String, name_property: true
 
 default_action :create
 
 action :create do
   instance = ::ChefCookbook::Instance::Helper.new(node)
 
-  directory new_resource.basedir do
+  directory new_resource.base_dir do
     owner instance.root
     group node['root_group']
-    mode 0700
+    mode 0o700
     recursive true
     action :create
   end
 
-  virtualenv_path = ::File.join(new_resource.basedir, '.venv')
+  virtualenv_path = ::File.join(new_resource.base_dir, '.venv')
 
   python_virtualenv virtualenv_path do
     python '2'

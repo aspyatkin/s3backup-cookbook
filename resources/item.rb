@@ -1,6 +1,6 @@
 resource_name :s3backup_item
 
-property :entry_name, String, name_property: true
+property :name, String, name_property: true
 
 property :backup_command, String, required: true
 
@@ -21,7 +21,7 @@ action :create do
     action :create
   end
 
-  script_filepath = ::File.join(basedir, "backup_#{new_resource.entry_name}")
+  script_filepath = ::File.join(basedir, new_resource.name)
 
   template script_filepath do
     cookbook 's3backup'
@@ -30,19 +30,19 @@ action :create do
     group node['root_group']
     variables(
       virtualenv_path: ::File.join(basedir, '.venv'),
-      entry_name: new_resource.entry_name,
+      name: new_resource.name,
       backup_command: new_resource.backup_command,
       aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
       aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
       aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
       aws_s3_bucket_name: new_resource.aws_s3_bucket_name
     )
-    mode 0700
+    mode 0o700
     sensitive true
     action :create
   end
 
-  s3backup_cron_entry "backup_#{new_resource.entry_name}" do
+  s3backup_cron_entry new_resource.name do
     command script_filepath
     schedule new_resource.schedule
     action :create
@@ -50,13 +50,13 @@ action :create do
 end
 
 action :delete do
-  script_filepath = ::File.join(basedir, "backup_#{new_resource.entry_name}")
+  script_filepath = ::File.join(basedir, new_resource.name)
 
   file script_filepath do
     action :delete
   end
 
-  s3backup_cron_entry "backup_#{new_resource.entry_name}" do
+  s3backup_cron_entry new_resource.name do
     command script_filepath
     schedule new_resource.schedule
     action :delete
