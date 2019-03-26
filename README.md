@@ -17,6 +17,8 @@ The backup process is triggered by cron. During the process:
 - all files placed in the temporary directory are uploaded to Amazon S3;
 - the temporary directory is removed.
 
+It may be useful to run a script beforehand so as to decide whether to proceed with a backup or not. From `2.2.0` a new property `check_command` is added to `s3backup_item` resource. When a script in `check_command` returns `0`, a backup process will proceed.
+
 ## Usage
 
 For instance, this is how an application backup could be setup. The schedule is set with the cron-like syntax.
@@ -40,6 +42,10 @@ s3backup_item 'myapp' do
   action :create
 end
 ```
+
+### check_command use case
+
+A script in `check_command` can, for instance, log into a special email account and search for a message from a whitelisted address (e.g. ops team). If there is such a message, the script will exit with code `0`, thus confirming the request for a backup.
 
 ## License
 MIT © [Alexander Pyatkin](https://github.com/aspyatkin)

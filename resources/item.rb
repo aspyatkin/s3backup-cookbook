@@ -3,6 +3,7 @@ resource_name :s3backup_item
 property :name, String, name_property: true
 
 property :backup_command, String, required: true
+property :check_command, [String, NilClass], default: nil
 
 property :aws_iam_access_key_id, String, required: true
 property :aws_iam_secret_access_key, String, required: true
@@ -32,6 +33,7 @@ action :create do
       virtualenv_path: ::File.join(basedir, '.venv'),
       name: new_resource.name,
       backup_command: new_resource.backup_command,
+      check_command: new_resource.check_command,
       aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
       aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
       aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
