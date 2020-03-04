@@ -19,6 +19,34 @@ The backup process is triggered by cron. During the process:
 
 It may be useful to run a script beforehand so as to decide whether to proceed with a backup or not. From `2.2.0` a new property `check_command` is added to `s3backup_item` resource. When a script in `check_command` returns `0`, a backup process will proceed.
 
+## Prerequisites
+
+- python
+- pip
+- awscli pip package
+
+One can use the following Chef snippets (Ubuntu) so as to install them:
+
+```ruby
+# the snippet was tested on Ubuntu. Package names may be different in other Linux distributions.
+
+# Python 2
+package 'python2.7'
+package 'python-pip'
+
+execute 'pip install awscli' do
+  action :run
+end
+
+# Python 3
+# package 'python3'
+# package 'python3-pip'
+
+# execute 'pip3 install awscli' do
+#   action :run
+# end
+```
+
 ## Usage
 
 For instance, this is how an application backup could be setup. The schedule is set with the cron-like syntax.

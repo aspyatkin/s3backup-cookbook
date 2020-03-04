@@ -29,16 +29,18 @@ action :create do
     source 'backup.item.sh.erb'
     owner instance.root
     group node['root_group']
-    variables(
-      virtualenv_path: ::File.join(basedir, '.venv'),
-      name: new_resource.name,
-      backup_command: new_resource.backup_command,
-      check_command: new_resource.check_command,
-      aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
-      aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
-      aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
-      aws_s3_bucket_name: new_resource.aws_s3_bucket_name
-    )
+    variables(lazy {
+      {
+        name: new_resource.name,
+        backup_command: new_resource.backup_command,
+        check_command: new_resource.check_command,
+        aws_executable: ::ChefCookbook::S3BackupHelper.which_cmd('aws'),
+        aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
+        aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
+        aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
+        aws_s3_bucket_name: new_resource.aws_s3_bucket_name
+      }
+    })
     mode 0o700
     sensitive true
     action :create
