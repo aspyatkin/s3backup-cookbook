@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#! /usr/bin/env bash
 <% unless @check_command.nil? %>
 DUMP_REQUESTED=`<%= @check_command %>`
 if [ $? -ne 0 ]; then
@@ -16,7 +16,9 @@ if [ "$RETVAL" != "0" ]; then
   exit "$RETVAL"
 fi
 
+source <%= @virtualenv_path %>/bin/activate
 cd $TMP_DIR
-find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type f -printf "%f\0" | AWS_ACCESS_KEY_ID=<%= @aws_iam_access_key_id %> AWS_SECRET_ACCESS_KEY=<%= @aws_iam_secret_access_key %> AWS_DEFAULT_REGION=<%= @aws_s3_bucket_region %> AWS_DEFAULT_OUTPUT=text xargs -0 -I {} <%= @aws_executable %> s3 cp --no-progress "{}" "s3://<%= @aws_s3_bucket_name %>/<%= @name %>/{}"
+find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type f -printf "%f\0" | AWS_ACCESS_KEY_ID=<%= @aws_iam_access_key_id %> AWS_SECRET_ACCESS_KEY=<%= @aws_iam_secret_access_key %> AWS_DEFAULT_REGION=<%= @aws_s3_bucket_region %> AWS_DEFAULT_OUTPUT=text xargs -0 -I {} aws s3 cp --no-progress "{}" "s3://<%= @aws_s3_bucket_name %>/<%= @name %>/{}"
+deactivate
 
 rm -rf $TMP_DIR

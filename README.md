@@ -22,8 +22,7 @@ It may be useful to run a script beforehand so as to decide whether to proceed w
 ## Prerequisites
 
 - python
-- pip
-- awscli pip package
+- virtualenv
 
 One can use the following Chef snippets (Ubuntu) so as to install them:
 
@@ -32,19 +31,11 @@ One can use the following Chef snippets (Ubuntu) so as to install them:
 
 # Python 2
 package 'python2.7'
-package 'python-pip'
-
-execute 'pip install awscli' do
-  action :run
-end
+package 'python-virtualenv'
 
 # Python 3
 # package 'python3'
-# package 'python3-pip'
-
-# execute 'pip3 install awscli' do
-#   action :run
-# end
+# package 'python3-venv'
 ```
 
 ## Usage
@@ -53,6 +44,7 @@ For instance, this is how an application backup could be setup. The schedule is 
 
 ```ruby
 s3backup_item 'myapp' do
+  python '3'  # default: '2'
   backup_command '/usr/local/bin/myapp-backup'
   aws_iam_access_key_id 'AKIA...'
   aws_iam_secret_access_key 'tLSy...'

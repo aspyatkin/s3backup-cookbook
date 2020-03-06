@@ -2,6 +2,8 @@ resource_name :s3backup_item
 
 property :name, String, name_property: true
 
+property :python, String, default: '2'
+
 property :backup_command, String, required: true
 property :check_command, [String, NilClass], default: nil
 
@@ -16,25 +18,26 @@ default_action :create
 
 action :create do
   basedir = '/etc/chef-s3backup'
-  instance = ::ChefCookbook::Instance::Helper.new(node)
 
   s3backup_base basedir do
+    python new_resource.python
     action :create
   end
 
   script_filepath = ::File.join(basedir, new_resource.name)
+  virtualenv_path = ::File.join(basedir, '.venv')
 
   template script_filepath do
     cookbook 's3backup'
     source 'backup.item.sh.erb'
-    owner instance.root
+    owner 'root'
     group node['root_group']
     variables(lazy {
       {
         name: new_resource.name,
         backup_command: new_resource.backup_command,
         check_command: new_resource.check_command,
-        aws_executable: ::ChefCookbook::S3BackupHelper.which_cmd('aws'),
+        virtualenv_path: virtualenv_path,
         aws_iam_access_key_id: new_resource.aws_iam_access_key_id,
         aws_iam_secret_access_key: new_resource.aws_iam_secret_access_key,
         aws_s3_bucket_region: new_resource.aws_s3_bucket_region,
