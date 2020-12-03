@@ -1,6 +1,7 @@
 resource_name :s3backup_item
 
 property :name, String, name_property: true
+property :action_name_template, String, default: 'backup_%{name}'
 
 property :python, String, default: '2'
 
@@ -24,7 +25,8 @@ action :create do
     action :create
   end
 
-  script_filepath = ::File.join(basedir, new_resource.name)
+  action_name = new_resource.action_name_template % { name: new_resource.name }
+  script_filepath = ::File.join(basedir, action_name)
   virtualenv_path = ::File.join(basedir, '.venv')
 
   template script_filepath do
@@ -49,7 +51,7 @@ action :create do
     action :create
   end
 
-  s3backup_cron_entry new_resource.name do
+  s3backup_cron_entry action_name do
     command script_filepath
     schedule new_resource.schedule
     action :create
@@ -57,13 +59,14 @@ action :create do
 end
 
 action :delete do
-  script_filepath = ::File.join(basedir, new_resource.name)
+  action_name = new_resource.action_name_template % { name: new_resource.name }
+  script_filepath = ::File.join(basedir, action_name)
 
   file script_filepath do
     action :delete
   end
 
-  s3backup_cron_entry new_resource.name do
+  s3backup_cron_entry action_name do
     command script_filepath
     schedule new_resource.schedule
     action :delete
